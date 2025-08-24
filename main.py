@@ -27,7 +27,7 @@ app.add_middleware(
 )
 
 # Your trained labels — same order as training
-commands = np.array(['Kwasia', 'Wotriso', 'Unknown', 'Twem', 'Trumu', 'Bodamfo', 'Kurasini', 'Aboa'])
+commands = np.array(['Profane', 'non_profane'])
 
 # Load the model
 model = None
@@ -36,7 +36,7 @@ def load_model():
     """Load the TensorFlow model"""
     global model
     try:
-        model = tf.keras.models.load_model("profanity_model_new.h5")
+        model = tf.keras.models.load_model("profanity.h5")
         print("Model loaded successfully")
     except Exception as e:
         print(f"Error loading model: {e}")
@@ -127,8 +127,8 @@ def predict_profanity(audio_data: bytes, threshold: float = 0.6) -> PredictionRe
         # Clean up temporary file
         os.unlink(temp_file_path)
 
-        # Determine if it's profane (excluding 'Unknown')
-        is_profane = predicted_label != 'Unknown' and confidence >= threshold
+        # Determine if it's profane (binary classification)
+        is_profane = predicted_label == 'Profane' and confidence >= threshold
         
         # Determine if prediction is uncertain (low confidence)
         is_uncertain = confidence < threshold
@@ -191,7 +191,7 @@ def predict_profanity_stream(audio_data: bytes, threshold: float = 0.6, sr: int 
                 end_time=end_time,
                 detected_label=label,
                 confidence=confidence,
-                is_profane=confidence > threshold and label != "Unknown",
+                is_profane=confidence > threshold and label == "Profane",
                 is_uncertain=confidence < threshold
             )
 
